@@ -36,6 +36,8 @@
 对于没有METAR/TAF信息的基础, 则应用以下插值算法对邻居站点的信息进行插值, 形成有效气象信息:
 
 ### Graph RAG Layer
+我们应用llama_index框架, 搜集多个航空领域公开资料, 构建了一个拥有三级社区结构的Graph RAG系统, 详述如下:
+#### Matrial Sources
 #### Entity and Relationship Design
 #### Community Build
 #### Query Methods
@@ -46,11 +48,13 @@
 ### Finetune
 我们在Unsloth框架下, 应用QLoRA算法, 对基准模型进行了多阶段微调:
 #### 循环自监督学习
+由于航路气象自然语言报告数据的匮乏, 在微调的第一阶段, 我们采用了循环自监督学习策略, 首先让模型根据输入的结构化气象报告输出自然语言叙述, 然后依据这一输出反向构建结构化气象报告, 对比两个结构化报告的Mean Square Error, 逐步提高模型对航空气象信息的理解能力.
+
+#### Retrieval-Augmented LLM Alignment Direct Preference Optimization
+给定Graph RAG提供的Context信息, 模型的Classify及操作相关建议推理能力对于我们的系统来说也至关重要. 因此, 我们依据NTSB数据库中的事故数据, 以Gemini3 作为教师模型, 生成了1000个RALA-DPO数据对, 并从中人工筛选、检验了100对作为验证集, 应用DPO方法对模型进行了进一步微调.
 
 #### 历史事故数据驱动的监督学习
-
-#### RALA-DPO
-
+在RALA-DPO微调之后, 我们混合大参数模型生成的合成数据(Gemini 3)与依据NTSB数据库中挖掘到的气象相关事故叙述(Narrative)反向生成的结构化气象报告(200条, LLM辅助的人工生成), 对模型进行进一步微调. 为了提高模型对Critical情景的理解能力, 我们对事故相关数据进行了Oversample.
 
 ## Experiment
 我们结合合成数据和真实事故样本, 在基准模型及微调模型上进行了多次试验, 详述如下:
