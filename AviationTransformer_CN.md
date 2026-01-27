@@ -44,24 +44,42 @@
 ### Numeric Logic Layer
 
 ### Finetune
+我们
 #### 循环自监督学习
 #### 历史事故数据驱动的监督学习
 RALA-DPO
 
 ## Experiment
+
 ### Database
 #### 合成数据
 我们收集了加拿大210个航空气象站三个月以来的历史气象数据, 并在此基础上, 调用Gemini 3 API, 将1000条经过Graph RAG 增强的数据作为输入, 以Avation Weather Handbook Chapter 3.3.1.1为基础构建Prompt, 产生对应航路的气象报告, 用于小参数模型(8B)的微调.
-#### 事故数据库
+#### 航空气象事故数据库
 应用Graph RAG和Gemini3 API, 从NTSB数据库中, 挑选出200条与气象高度相关的事故信息, 反向构建航路气象数据表, 并在经过Graph RAG增强后, 与原本的事故Narrative结合构造完整的数据点, 形成黄金标准数据库, 并在微调时对这个数据库进行oversample, 增强模型在面对严苛气象情况时准确度.
 
 ### Metrics
+在航空气象信息分析及航路气象报告生成领域, 传统的大模型评估指标如BLEU(仅衡量生成文本与参考文本的n-gram重合度), ROUGE(侧重于召回率, 常用于摘要)并不适用, 为了准确地评估这一智能系统的准确度和稳定性性, 我们使用了以下指标(Metric).
+1. FactScore. 将模型生成的气象报告分解为原子事实(如风速, 温度, 降雨etc), 与原始报文中原子事实进行对比.
+$$
+    FactScore = \frac{Proved Facts}{Total Facts}\times100\%
+$$
+原子事实必须不可再分, 并且具有独立性, 不需要上下文就能理解.
+2. Graph RAG 增强层的分类(Classify)准确率
+针对增强层的中间报告, 逐站点计算其分类的准确率. 评估过程中, 可以输出通过输出Graph RAG context信息直接查询原始文档, 提升评估效率.
+3. Go, No-Go二分类准确率
+依据建立的航空气象事故数据库, 检测模型最终给出的决策建议的准确性.
 
 ### Baseline Model
-
+我们选择Qwen 3 8B 模型作为基准模型, 并用航空气象事故数据库上评估其能力.
 ### Finetune Curve
 
 ### Result Comparason
+|Model|FactScore|Graph RAG Based Classify Accuracy|Go No-Go Binary Accuracy|
+|---|---|---|---|
+|Baseline|
+|Graph RAG Enhanced Baseline|
+|Finetuned Model|
+|Graph RAG Enhanced Finetuned Model|
 
 ## Reference
 META RAG https://arxiv.org/abs/2005.11401
