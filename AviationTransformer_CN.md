@@ -44,13 +44,16 @@
 ### Numeric Logic Layer
 
 ### Finetune
-我们
+我们在Unsloth框架下, 应用QLoRA算法, 对基准模型进行了多阶段微调:
 #### 循环自监督学习
+
 #### 历史事故数据驱动的监督学习
-RALA-DPO
+
+#### RALA-DPO
+
 
 ## Experiment
-
+我们结合合成数据和真实事故样本, 在基准模型及微调模型上进行了多次试验, 详述如下:
 ### Database
 #### 合成数据
 我们收集了加拿大210个航空气象站三个月以来的历史气象数据, 并在此基础上, 调用Gemini 3 API, 将1000条经过Graph RAG 增强的数据作为输入, 以Avation Weather Handbook Chapter 3.3.1.1为基础构建Prompt, 产生对应航路的气象报告, 用于小参数模型(8B)的微调.
