@@ -26,13 +26,42 @@
 除了检索增强, 领域知识注入也是幻觉问题重要解决方案. 但对于大模型来说, 全参数微调往往昂贵且效率低下. Lora方法为低成本、高效率微调打下了坚实的基础, 而QLoRA则进一步降低了微调成本. AviationGPT同样应用了模型微调技术. 他们收集了海量的航空领域非标签文本(Unlabeled Aviation Text), 包括事故报告, 技术手册, 气象通报等, 通过在这些数据上进行自监督学习, 将模型能力迁移至航空语境. 在此基础上, 他们还通过构建好的"指令-回复"对, 对模型进行了有监督微调(SFT),使得模型能够理解特定的任务指令. 值得注意的是, 直接用航空领域高度编码压缩的数据对模型进行微调, 并没有最大程度上利用模型从海量自然语言中学习到的泛化能力.
 数值准确性是生成式大模型在处理安全相关数据时面临的一个重大挑战, 在航空领域尤其如此. 在标准的Transformer架构中, 分词器(Tokenizer)会将数值切分为无意义的碎片. xVal试图通过引入一种新的数值编码方案, 直接将数值作为连续变量注入模型的嵌入层(Embedding Layer). 然而, 尽管这种方式十分优雅, 但它更适用于绝对位置编码的架构, 现有大模型往往使用ROPE等相对位置编码, 为直接应用这一方案增加了挑战. 与此同时, NumeroLogic提出了一种非侵入式的, 更通用的解决方案: 只对输入文本进行预处理, 通过特殊的数值格式诱导模型, 增强其对数值的位数、量级的理解能力, 起到类似Chain-of-thought的效果.
 在以上研究的基础上, 我们在系统中增加了一个Rule-based Decoder layer, 将高度编码的航空气象信息解码为一般语言模型可以理解的语言块(Chunk), 并应用Graph RAG将气象信息按严重程度分类, 同时给出相应操作建议, 生成一个结构化的, 经过NumeroLogic预处理的中间报告, 以此报告为模型输入, 通过循环自监督学习和RALA-DPO微调, 最终生成符合航空标准的航路天气简报.
+
 ## Methodology
 ### Architecture
 ![alt text](Architechture.png)
 
+### Rule Based Decoder Layer
+依据Avation Weather Handbook Chapter 24给出的规则, 我们用Regex 模式匹配构建了一个天气信息解析层, 首先将飞行途中遇到的所有相关机场和气象台(Aerodrome)(包括起飞和降落时的备降机场)的METAR(起飞站点)和TAF(降落站点)信息收集起来, 同时将途径站点(Enroute)发送的UpperWind信息也收集起来, 按照飞行时间排序, 形成初步报告.
+对于没有METAR/TAF信息的基础, 则应用以下插值算法对邻居站点的信息进行插值, 形成有效气象信息:
 
+### Graph RAG Layer
+#### Entity and Relationship Design
+#### Community Build
+#### Query Methods
+#### Assess Method
 
+### Numeric Logic Layer
 
+### Finetune
+#### 循环自监督学习
+#### 历史事故数据驱动的监督学习
+RALA-DPO
+
+## Experiment
+### Database
+#### 合成数据
+我们收集了加拿大210个航空气象站三个月以来的历史气象数据, 并在此基础上, 调用Gemini 3 API, 将1000条经过Graph RAG 增强的数据作为输入, 以Avation Weather Handbook Chapter 3.3.1.1为基础构建Prompt, 产生对应航路的气象报告, 用于小参数模型(8B)的微调.
+#### 事故数据库
+应用Graph RAG和Gemini3 API, 从NTSB数据库中, 挑选出200条与气象高度相关的事故信息, 反向构建航路气象数据表, 并在经过Graph RAG增强后, 与原本的事故Narrative结合构造完整的数据点, 形成黄金标准数据库, 并在微调时对这个数据库进行oversample, 增强模型在面对严苛气象情况时准确度.
+
+### Metrics
+
+### Baseline Model
+
+### Finetune Curve
+
+### Result Comparason
 
 ## Reference
 META RAG https://arxiv.org/abs/2005.11401
