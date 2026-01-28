@@ -28,6 +28,7 @@
 在以上研究的基础上, 我们在系统中增加了一个Rule-based Decoder layer, 将高度编码的航空气象信息解码为一般语言模型可以理解的语言块(Chunk), 并应用Graph RAG将气象信息按严重程度分类, 同时给出相应操作建议, 生成一个结构化的, 经过NumeroLogic预处理的中间报告, 以此报告为模型输入, 通过循环自监督学习和RALA-DPO微调, 最终生成符合航空标准的航路天气简报.
 
 ## Methodology
+我们的系统架构如下: 
 ### Architecture
 ![alt text](Architechture.png)
 
@@ -38,6 +39,7 @@
 ### Graph RAG Layer
 我们应用llama_index框架, 搜集多个航空领域公开资料, 构建了一个拥有三级社区结构的Graph RAG系统, 详述如下:
 #### Matrial Sources
+我们搜集了航空气象领域公开的15个资料, 包括 Meteorological Service for International Air Navigation 标准, 和 FAA 的 Aviation Weather Handbook, 详情见表2.
 #### Entity and Relationship Design
 #### Community Build
 #### Query Methods
